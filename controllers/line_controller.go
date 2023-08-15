@@ -1,27 +1,48 @@
 package controllers
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
 
-type LineController struct{}
+type LineController struct {
+	Bot *linebot.Client
+}
 
-func NewLineController() *LineController {
-	return new(LineController)
+func NewLineController() (*LineController, error) {
+
+	bot, err := linebot.New(os.Getenv("LINE_CHANNEL_SECRET"), os.Getenv("LINE_CHANNEL_ACCESS_TOKEN"))
+	if err != nil {
+		log.Println("Could not valid channel credentials")
+		return nil, err
+	}
+	lineController := LineController{Bot: bot}
+	log.Println(bot)
+	log.Println(lineController)
+	return &lineController, nil
 }
 
 func (lc *LineController) Webhook(c *gin.Context) {
-	body, err := c.GetRawData()
+	events, err := lc.Bot.ParseRequest(c.Request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to read request body",
+			"Status": "Server internal error",
+			"error":  err,
 		})
-		return
 	}
-	fmt.Println(string(body))
+	for _, event := range events {
+		if event.Type == linebot.EventTypeMessage {
+			switch message := event.Message.(type) {
+			case *linebot.TextMessage:
+				log.Println(message.Text)
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{"Status": "Hello Line :), Everything seems Ok"})
 	return
 }
