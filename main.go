@@ -29,6 +29,6 @@ func main() {
 	r.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"Status": "Server is up and running!"})
 	})
-	r.POST("/line_webhook", lineController.TestWebhook)
+	r.POST("/line_webhook", lineController.Webhook)
 	r.Run()
 }
