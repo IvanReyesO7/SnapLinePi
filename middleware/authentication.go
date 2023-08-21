@@ -73,7 +73,7 @@ func validateToken(tokenString string) bool {
 	}
 
 	separatedNumbers := numbers.String()
-	// separatedText := text.String()
+	separatedText := text.String()
 
 	layout := "20060102150405"
 	parsedTime, err := time.Parse(layout, separatedNumbers)
@@ -85,8 +85,8 @@ func validateToken(tokenString string) bool {
 	currentTime := time.Now()
 	timeDifference := currentTime.Sub(parsedTime)
 
-	fiveMinutes := 30 * time.Minute
-	if timeDifference > fiveMinutes {
+	fiveMinutes := 5 * time.Minute
+	if timeDifference > fiveMinutes || separatedText != os.Getenv("AUTH_USER") {
 		log.Println("The parsed time ftom the token is greater than 5 minutes from the current time.")
 		return false
 	}
