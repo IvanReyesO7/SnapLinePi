@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"server-test/controllers"
+	"server-test/middleware"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -19,7 +20,7 @@ func main() {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowHeaders:     []string{"Content-Type", "Authentication"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
@@ -30,12 +31,10 @@ func main() {
 		log.Fatal(fmt.Sprintf("Could not load Line controller, err: %e", err))
 	}
 
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"Status": "Server is up and running!"})
-	})
-	r.GET("/test", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"Status": "Server is up and running!"})
-	})
+	r.GET("/health", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"Status": "Server is up and running!"}) })
 	r.POST("/line_webhook", lineController.Webhook)
+
+	r.Use(middleware.VerifyAuth)
+	r.GET("/snapshot")
 	r.Run()
 }
