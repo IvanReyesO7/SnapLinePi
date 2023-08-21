@@ -4,9 +4,13 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
+	"time"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 )
@@ -48,7 +52,43 @@ func VerifyAuth(c *gin.Context) {
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(ciphertext, ciphertext)
 
-	log.Println(string(ciphertext))
-
+	decryptedString := (string(ciphertext))
+	validToken := validateToken(decryptedString)
+	if !validToken {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized request"})
+		return
+	}
 	c.Next()
+}
+
+func validateToken(tokenString string) bool {
+	var numbers, text strings.Builder
+
+	for _, char := range tokenString {
+		if unicode.IsDigit(char) {
+			numbers.WriteRune(char)
+		} else {
+			text.WriteRune(char)
+		}
+	}
+
+	separatedNumbers := numbers.String()
+	// separatedText := text.String()
+
+	layout := "20060102150405"
+	parsedTime, err := time.Parse(layout, separatedNumbers)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return false
+	}
+
+	currentTime := time.Now()
+	timeDifference := currentTime.Sub(parsedTime)
+
+	fiveMinutes := 30 * time.Minute
+	if timeDifference > fiveMinutes {
+		log.Println("The parsed time ftom the token is greater than 5 minutes from the current time.")
+		return false
+	}
+	return true
 }
