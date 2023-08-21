@@ -21,7 +21,7 @@ func VerifyAuth(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized request"})
 		return
 	}
-	log.Println(tokenFromRequest)
+
 	ciphertext, err := hex.DecodeString(tokenFromRequest)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized request"})
