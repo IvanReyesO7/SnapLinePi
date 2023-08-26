@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -39,6 +40,9 @@ func (lc *LineController) Webhook(c *gin.Context) {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
 				log.Println(message.Text)
+				if strings.Contains(strings.ToLower(message.Text), "snapshot") {
+					log.Println("Initialize...")
+				}
 			}
 		}
 	}
