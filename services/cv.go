@@ -7,12 +7,12 @@ import (
 	"gocv.io/x/gocv"
 )
 
-func TakeSnapshot() {
+func TakeSnapshot() (*string, error) {
 	deviceID := 0
 	webcam, err := gocv.OpenVideoCapture(deviceID)
 	if err != nil {
 		fmt.Printf("Error opening video capture device: %v\n", 0)
-		return
+		return nil, err
 	}
 	defer webcam.Close()
 
@@ -21,11 +21,11 @@ func TakeSnapshot() {
 
 	if ok := webcam.Read(&img); !ok {
 		fmt.Printf("cannot read device %v\n", deviceID)
-		return
+		return nil, err
 	}
 	if img.Empty() {
 		fmt.Printf("no image on device %v\n", deviceID)
-		return
+		return nil, err
 	}
 
 	currentTime := time.Now()
@@ -33,4 +33,5 @@ func TakeSnapshot() {
 	tmpFile := "tmp/" + timeFormated + ".jpg"
 
 	gocv.IMWrite(tmpFile, img)
+	return &tmpFile, nil
 }

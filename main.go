@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"server-test/controllers"
-	"server-test/middleware"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -31,10 +30,12 @@ func main() {
 		log.Fatal(fmt.Sprintf("Could not load Line controller, err: %e", err))
 	}
 
+	r.Static("/tmp", "./tmp")
+
 	r.GET("/health", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"Status": "Server is up and running!"}) })
 	r.POST("/line_webhook", lineController.Webhook)
 
-	r.Use(middleware.VerifyAuth)
+	// r.Use(middleware.VerifyAuth)
 	r.GET("/snapshot")
 	r.Run()
 }
