@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"server-test/services"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -42,6 +43,7 @@ func (lc *LineController) Webhook(c *gin.Context) {
 				log.Println(message.Text)
 				if strings.Contains(strings.ToLower(message.Text), "snapshot") {
 					log.Println("Initialize...")
+					services.TakeSnapshot()
 				}
 			}
 		}
