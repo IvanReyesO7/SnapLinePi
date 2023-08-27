@@ -42,17 +42,14 @@ func (lc *LineController) Webhook(c *gin.Context) {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				log.Println(event)
-				log.Println(message.Text)
 				if strings.Contains(strings.ToLower(message.Text), "snapshot") {
 					log.Println("Initialize...")
 					snapshot, err := services.TakeSnapshot()
-					log.Println(snapshot)
 					if err != nil {
-						// TODO send failed Line msg
+						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+						return
 					}
 
-					// Send picture to Line
 					hostname := os.Getenv("HOSTNAME")
 					imageUrl := hostname + *snapshot
 
@@ -62,14 +59,13 @@ func (lc *LineController) Webhook(c *gin.Context) {
 
 					textMessage := linebot.NewTextMessage(text)
 					imageMessage := linebot.NewImageMessage(imageUrl, imageUrl)
-					// append some message to messages
 					replyToken := event.ReplyToken
 					messages := []linebot.SendingMessage{textMessage, imageMessage}
 					m, err := lc.Bot.ReplyMessage(replyToken, messages...).Do()
 					log.Println(m)
 					if err != nil {
-						// Do something when some bad happened
-						log.Println(err)
+						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+						return
 					}
 				}
 			}
