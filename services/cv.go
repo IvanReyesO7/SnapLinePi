@@ -2,6 +2,8 @@ package services
 
 import (
 	"fmt"
+	"os"
+	"sync"
 	"time"
 
 	"gocv.io/x/gocv"
@@ -34,4 +36,14 @@ func TakeSnapshot() (*string, error) {
 
 	gocv.IMWrite(tmpFile, img)
 	return &tmpFile, nil
+}
+
+func DeleteFile(filePath string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	err := os.Remove(filePath)
+	if err != nil {
+		fmt.Printf("Error deleting file %s: %v\n", filePath, err)
+	} else {
+		fmt.Printf("File %s has been deleted successfully.\n", filePath)
+	}
 }

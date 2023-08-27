@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"server-test/services"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -53,19 +55,22 @@ func (lc *LineController) Webhook(c *gin.Context) {
 					// Send picture to Line
 					hostname := os.Getenv("HOSTNAME")
 					imageUrl := hostname + *snapshot
-					log.Println(imageUrl)
-					message := linebot.NewImageMessage(imageUrl, imageUrl)
+
+					currentTime := time.Now()
+					formattedTime := currentTime.Format("2006-01-02 15:04")
+					text := fmt.Sprintf("This snapshot was taken on %s", formattedTime)
+
+					textMessage := linebot.NewTextMessage(text)
+					imageMessage := linebot.NewImageMessage(imageUrl, imageUrl)
 					// append some message to messages
 					replyToken := event.ReplyToken
-					messages := []linebot.SendingMessage{message}
+					messages := []linebot.SendingMessage{textMessage, imageMessage}
 					m, err := lc.Bot.ReplyMessage(replyToken, messages...).Do()
 					log.Println(m)
 					if err != nil {
 						// Do something when some bad happened
 						log.Println(err)
 					}
-
-					// Delete picture
 				}
 			}
 		}
