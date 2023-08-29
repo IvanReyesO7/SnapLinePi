@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"server-test/controllers"
+	"server-test/tasks"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -14,9 +15,13 @@ import (
 
 func main() {
 	godotenv.Load(".env")
-	r := gin.Default()
 
-	r.Use(cors.New(cors.Config{
+	// Run background task
+	go tasks.CleanTempDir()
+
+	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST"},
 		AllowHeaders:     []string{"Content-Type", "Authentication"},
@@ -30,12 +35,12 @@ func main() {
 		log.Fatal(fmt.Sprintf("Could not load Line controller, err: %e", err))
 	}
 
-	r.Static("/tmp", "./tmp")
+	router.Static("/tmp", "./tmp")
 
-	r.GET("/health", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"Status": "Server is up and running!"}) })
-	r.POST("/line_webhook", lineController.Webhook)
+	router.GET("/health", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"Status": "Server is up and running!"}) })
+	router.POST("/line_webhook", lineController.Webhook)
 
 	// r.Use(middleware.VerifyAuth)
-	r.GET("/snapshot")
-	r.Run()
+	router.GET("/snapshot")
+	router.Run()
 }
