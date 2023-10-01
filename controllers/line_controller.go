@@ -54,15 +54,15 @@ func (lc *LineController) Webhook(c *gin.Context) {
 					imageUrl := hostname + *snapshot
 
 					currentTime := time.Now().Add(9 * time.Hour)
-					formattedTime := currentTime.Format("2006-01-02 15:04")
+					formattedDate := currentTime.Format("2006/01/02")
+					formattedTime := currentTime.Format("15:04:05")
 
-					text := fmt.Sprintf("This snapshot was taken on %s", formattedTime)
+					text := fmt.Sprintf("%s at %s", formattedDate, formattedTime)
 
-					textMessage := linebot.NewTextMessage(text)
-					imageMessage := linebot.NewImageMessage(imageUrl, imageUrl)
+					flexMessage := services.BuildFlexMessage(imageUrl, text)
 					replyToken := event.ReplyToken
-					messages := []linebot.SendingMessage{textMessage, imageMessage}
-					m, err := lc.Bot.ReplyMessage(replyToken, messages...).Do()
+
+					m, err := lc.Bot.ReplyMessage(replyToken, flexMessage).Do()
 					log.Println(m)
 					if err != nil {
 						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
