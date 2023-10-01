@@ -53,8 +53,9 @@ func (lc *LineController) Webhook(c *gin.Context) {
 					hostname := os.Getenv("HOSTNAME")
 					imageUrl := hostname + *snapshot
 
-					currentTime := time.Now()
+					currentTime := time.Now().Add(9 * time.Hour)
 					formattedTime := currentTime.Format("2006-01-02 15:04")
+
 					text := fmt.Sprintf("This snapshot was taken on %s", formattedTime)
 
 					textMessage := linebot.NewTextMessage(text)
