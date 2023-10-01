@@ -43,30 +43,18 @@ func (lc *LineController) Webhook(c *gin.Context) {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
 				if strings.Contains(strings.ToLower(message.Text), "snapshot") {
-					log.Println("Initialize...")
-					snapshot, err := services.TakeSnapshot()
 					if err != nil {
 						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 						return
 					}
 
-					hostname := os.Getenv("HOSTNAME")
-					imageUrl := hostname + *snapshot
-
-					currentTime := time.Now().Add(9 * time.Hour)
-					formattedDate := currentTime.Format("2006/01/02")
-					formattedTime := currentTime.Format("15:04:05")
-
-					text := fmt.Sprintf("%s at %s", formattedDate, formattedTime)
-
-					flexMessage := services.BuildFlexMessage(imageUrl, text)
+					flexMessage, err := snapshot()
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+						return
+					}
 					replyToken := event.ReplyToken
-
 					_, err = lc.Bot.ReplyMessage(replyToken, flexMessage).Do()
-					if err != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-						return
-					}
 				}
 			}
 		}
@@ -74,4 +62,24 @@ func (lc *LineController) Webhook(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"Status": "Hello Line :), Everything seems Ok"})
 	return
+}
+
+func snapshot() (*linebot.FlexMessage, error) {
+	log.Println("Initialize...")
+	snapshot, err := services.TakeSnapshot()
+	if err != nil {
+		return nil, err
+	}
+
+	hostname := os.Getenv("HOSTNAME")
+	imageUrl := hostname + *snapshot
+
+	currentTime := time.Now().Add(9 * time.Hour)
+	formattedDate := currentTime.Format("2006/01/02")
+	formattedTime := currentTime.Format("15:04:05")
+
+	text := fmt.Sprintf("%s at %s", formattedDate, formattedTime)
+
+	flexMessage := services.BuildFlexMessage(imageUrl, text)
+	return flexMessage, nil
 }
