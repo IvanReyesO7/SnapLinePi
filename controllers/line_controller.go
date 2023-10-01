@@ -62,8 +62,7 @@ func (lc *LineController) Webhook(c *gin.Context) {
 					flexMessage := services.BuildFlexMessage(imageUrl, text)
 					replyToken := event.ReplyToken
 
-					m, err := lc.Bot.ReplyMessage(replyToken, flexMessage).Do()
-					log.Println(m)
+					_, err = lc.Bot.ReplyMessage(replyToken, flexMessage).Do()
 					if err != nil {
 						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 						return
