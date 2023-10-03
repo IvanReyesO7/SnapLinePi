@@ -3,3 +3,12 @@ SnapLinePi is a Raspberry Pi camera module integration with a Line Bot, allowing
 
 ## TL;DR
 [GoCV](https://github.com/hybridgroup/gocv) 🤝 [Line-bot-sdk-go](https://github.com/line/line-bot-sdk-go)
+
+## My Setup
+- Raspberry PI 4 Model B (Ram 4GB)
+- Raspberry PI Camera V2
+- A plastic card
+- Tape
+- Glue
+
+![img_2621 (1) (1)](https://github.com/IvanReyesO7/SnapLinePi/assets/74359151/39441b1a-90d0-4556-bd01-c470b97785be)
