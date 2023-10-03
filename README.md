@@ -15,4 +15,4 @@ SnapLinePi is a Raspberry Pi camera module integration with a Line Bot, allowing
 
 ## Demo
 
-![ezgif-3-35e18d489c](https://github.com/IvanReyesO7/SnapLinePi/assets/74359151/f17288ea-422b-4e32-a3bc-703e60627808)
+![ezgif-5-81884ea738](https://github.com/IvanReyesO7/SnapLinePi/assets/74359151/f346916d-7dda-45c7-95ed-bc6f1e2c0709)
