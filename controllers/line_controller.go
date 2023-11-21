@@ -42,7 +42,8 @@ func (lc *LineController) Webhook(c *gin.Context) {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				if strings.Contains(strings.ToLower(message.Text), "snapshot") {
+				switch {
+				case strings.Contains(strings.ToLower(message.Text), "snapshot"):
 					if err != nil {
 						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 						return
