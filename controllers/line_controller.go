@@ -44,11 +44,6 @@ func (lc *LineController) Webhook(c *gin.Context) {
 			case *linebot.TextMessage:
 				switch {
 				case strings.Contains(strings.ToLower(message.Text), "snapshot"):
-					if err != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-						return
-					}
-
 					flexMessage, err := snapshot()
 					if err != nil {
 						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -56,6 +51,14 @@ func (lc *LineController) Webhook(c *gin.Context) {
 					}
 					replyToken := event.ReplyToken
 					_, err = lc.Bot.ReplyMessage(replyToken, flexMessage).Do()
+				case strings.Contains(strings.ToLower(message.Text), "clip"):
+					BubbleContainer, err := clip()
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+						return
+					}
+					replyToken := event.ReplyToken
+					_, err = lc.Bot.ReplyMessage(replyToken, linebot.NewFlexMessage("Flex Message", BubbleContainer)).Do()
 				}
 			}
 		}
@@ -66,7 +69,7 @@ func (lc *LineController) Webhook(c *gin.Context) {
 }
 
 func snapshot() (*linebot.FlexMessage, error) {
-	log.Println("Initialize...")
+	log.Println("Initializing...")
 	snapshot, err := services.TakeSnapshot()
 	if err != nil {
 		return nil, err
@@ -81,6 +84,27 @@ func snapshot() (*linebot.FlexMessage, error) {
 
 	text := fmt.Sprintf("%s at %s", formattedDate, formattedTime)
 
-	flexMessage := services.BuildFlexMessage(imageUrl, text)
+	flexMessage := services.BuildFlexSnapshotMessage(imageUrl, text)
 	return flexMessage, nil
+}
+
+func clip() (*linebot.BubbleContainer, error) {
+	log.Println("Initializing...")
+	clip, preview, err := services.TakeClip()
+	if err != nil {
+		return nil, err
+	}
+	duration := 10 * time.Second
+	time.Sleep(duration)
+
+	log.Println(clip, preview)
+
+	hostname := os.Getenv("HOSTNAME")
+	videoUrl := hostname + *clip
+	imageUrl := hostname + *preview
+
+	log.Println(videoUrl, imageUrl)
+
+	BubbleContainer := services.BuildFlexClipMessage(videoUrl, imageUrl)
+	return BubbleContainer, nil
 }
