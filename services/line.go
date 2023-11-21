@@ -2,7 +2,7 @@ package services
 
 import "github.com/line/line-bot-sdk-go/v7/linebot"
 
-func BuildFlexMessage(imageUrl string, text string) *linebot.FlexMessage {
+func BuildFlexSnapshotMessage(imageUrl string, text string) *linebot.FlexMessage {
 	flexContainer := &linebot.BubbleContainer{
 		Type: linebot.FlexContainerTypeBubble,
 		Hero: &linebot.ImageComponent{
@@ -62,5 +62,28 @@ func BuildFlexMessage(imageUrl string, text string) *linebot.FlexMessage {
 
 	flexMessage := linebot.NewFlexMessage("Snapshot Message", flexContainer)
 	return flexMessage
+}
 
+func BuildFlexClipMessage(videoUrl string, previewImageUrl string) *linebot.BubbleContainer {
+	hero := linebot.VideoComponent{
+		Type:       linebot.FlexComponentTypeVideo,
+		URL:        videoUrl,
+		PreviewURL: previewImageUrl,
+		AltContent: &linebot.ImageComponent{
+			Type:        linebot.FlexComponentTypeImage,
+			Size:        linebot.FlexImageSizeTypeFull,
+			AspectRatio: "20:13",
+			AspectMode:  linebot.FlexImageAspectModeTypeCover,
+			URL:         previewImageUrl,
+		},
+		AspectRatio: "20:13",
+	}
+
+	bubble := linebot.BubbleContainer{
+		Type: linebot.FlexContainerTypeBubble,
+		Size: linebot.FlexBubbleSizeTypeMega,
+		Hero: &hero,
+	}
+
+	return &bubble
 }
