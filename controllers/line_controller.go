@@ -52,13 +52,13 @@ func (lc *LineController) Webhook(c *gin.Context) {
 					replyToken := event.ReplyToken
 					_, err = lc.Bot.ReplyMessage(replyToken, flexMessage).Do()
 				case strings.Contains(strings.ToLower(message.Text), "clip"):
-					BubbleContainer, err := clip()
+					flexMessage, err := clip()
 					if err != nil {
 						c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 						return
 					}
 					replyToken := event.ReplyToken
-					_, err = lc.Bot.ReplyMessage(replyToken, linebot.NewFlexMessage("Flex Message", BubbleContainer)).Do()
+					_, err = lc.Bot.ReplyMessage(replyToken, flexMessage).Do()
 				}
 			}
 		}
@@ -88,14 +88,12 @@ func snapshot() (*linebot.FlexMessage, error) {
 	return flexMessage, nil
 }
 
-func clip() (*linebot.BubbleContainer, error) {
+func clip() (*linebot.FlexMessage, error) {
 	log.Println("Initializing...")
 	clip, preview, err := services.TakeClip()
 	if err != nil {
 		return nil, err
 	}
-	duration := 10 * time.Second
-	time.Sleep(duration)
 
 	log.Println(clip, preview)
 
@@ -103,8 +101,14 @@ func clip() (*linebot.BubbleContainer, error) {
 	videoUrl := hostname + *clip
 	imageUrl := hostname + *preview
 
+	currentTime := time.Now().Add(9 * time.Hour)
+	formattedDate := currentTime.Format("2006/01/02")
+	formattedTime := currentTime.Format("15:04:05")
+
+	text := fmt.Sprintf("%s at %s", formattedDate, formattedTime)
+
 	log.Println(videoUrl, imageUrl)
 
-	BubbleContainer := services.BuildFlexClipMessage(videoUrl, imageUrl)
-	return BubbleContainer, nil
+	flexMessage := services.BuildFlexClipMessage(videoUrl, imageUrl, text)
+	return flexMessage, nil
 }
